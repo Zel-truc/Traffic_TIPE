@@ -9,16 +9,24 @@ let accelerate l vmax =
 		|Voiture a -> if a < vmax then l.(i) <- Voiture (a+1)
 	done
 
-let deccelerate l = 
+
 	let collision l n v =
-	let newv = ref v in
-		for i = (n+1) to (n+v) do
-			match l.(i) with
-			|Empty -> ()
-			|Voiture _ -> if (i-n) < !newv then newv:= (i-n-1)
-	done;
-	!newv
-in
+                let newv = ref v in
+                let check = ref true in 
+                for i = n+1 to n+v do
+                        if i < Array.length l then
+                        match l.(i) with
+                        |Empty -> ()
+                        |Voiture _ -> if !check then begin newv:= i-n-1;
+                                                          check:= false end
+                done;
+                !newv
+
+
+
+
+
+let deccelerate l = 
 for i = 0 to Array.length l - 1 do 
 	match l.(i) with
 	|Empty -> ()
@@ -46,17 +54,16 @@ let tout grille =
 	let proba = 50 in 
 	(*fin des defs*)
 	accelerate grille vmax;
-	deccelerate grille;
+        deccelerate grille;
 	randomizer grille proba;
 	mvt grille
  
-let fill grille = 
-	grille.(0) <- Voiture 3;
-	grille.(2) <- Voiture 3;
-	grille.(5) <- Voiture 3;
-	grille.(6) <- Voiture 3;
-	grille.(9) <- Voiture 3;
-	grille.(730) <- Voiture 3
+let fill grille =
+        grille.(0) <- Voiture 3;
+         grille.(2) <- Voiture 2;
+         grille.(5) <- Voiture 1
+
+
 
 
 let draw_grille () = 
@@ -79,38 +86,23 @@ let draw_tableau l =
 			draw_rect (x*32) (y*36) 32 36;
 			match l.(!i) with
 				|Empty -> i:=!i+1 ; set_color magenta; fill_rect (x*32+1) (y*36+1) 31 35
-				|Voiture a -> if a = 0 then begin i:=!i+1 ; set_color red; i:=!i+1 ; fill_rect (x*32+1) (y*36+1) 31 35 end
+				|Voiture a -> 
+                        if a < 3 then begin i:=!i+1 ; set_color red; fill_rect (x*32+1) (y*36+1) 31 35 end
 			else begin i:=!i+1 ; set_color cyan; fill_rect (x*32+1) (y*36+1) 31 35 end;
 				done
 done
- (*
-let draw_tableau l = 
-	let level = ref 0 in
-	for i = 0 to Array.length l - 1 do
-	match l.(i) with
-	|Empty -> putpixel gris_fonce (i mod 50) !level
-	|Voiture a -> if a = 0 then putpixel rouge (i mod 50) !level else putpixel orange (i mod 50) !level
-done
 
-let _ =
-	let grille = Array.make 200 Empty in
-	couleur rouge noir;
-	attroff(A.color);
-	fill grille;
-
-   couleur rouge noir;
-		
-        draw_grille grille;
-
-
-*)
-
+	
 let _ = 
 	let grille = Array.make 800 Empty in
 	open_graph " 1280x720";
 	remember_mode true;
 	display_mode false;
-	synchronize ();
-fill grille;
-	let check = ref false in
-	while !check = false do  draw_tableau grille; Unix.sleepf 0.005; check:= Graphics.key_pressed() done
+        fill grille;
+        for _ = 0 to 500 do     
+                                grille.(0) <- Voiture 1; 
+                                clear_graph();
+                                draw_tableau grille; 
+                                synchronize();
+                                tout grille;
+                                Unix.sleepf 0.5  done
