@@ -1,11 +1,12 @@
 open Graphics
-type case = Empty | Voiture of int
+type case = Empty | Voiture of int | Block
 
 
 let accelerate l vmax =
 	for i = 0 to Array.length l -1 do
 		match l.(i) with 
 		|Empty -> ()
+                |Block -> ()
 		|Voiture a -> if a < vmax then l.(i) <- Voiture (a+1)
 	done
 
@@ -19,6 +20,8 @@ let accelerate l vmax =
                         |Empty -> ()
                         |Voiture _ -> if !check then begin newv:= i-n-1;
                                                           check:= false end
+                        |Block ->     if !check then begin newv:= i-n-1;
+                                                          check:= false end
                 done;
                 !newv
 
@@ -30,6 +33,7 @@ let deccelerate l =
 for i = 0 to Array.length l - 1 do 
 	match l.(i) with
 	|Empty -> ()
+        |Block -> ()
 	|Voiture a -> l.(i) <- Voiture (collision l i a)
 done
 
@@ -38,6 +42,7 @@ let randomizer l p =
 	for i = 0 to Array.length l-1 do 
 	match l.(i) with
 	|Empty -> ()
+        |Block -> ()
 	|Voiture a -> if a > 0 && Random.int 100 < p then l.(i) <- Voiture (a-1)
 done
 
@@ -45,6 +50,7 @@ let mvt l =
 	for i = Array.length l - 1 downto 0 do
 		match l.(i) with
 		|Empty -> ()
+                |Block -> ()
 		|Voiture a -> if (i+a) < Array.length l then l.(i+a) <- Voiture a; l.(i) <- Empty
 done
 
@@ -66,43 +72,44 @@ let fill grille =
 
 
 
-let draw_grille () = 
-	set_color black;
-	for y = 0 to 20 do
-	for x = 0 to  40 do
-		set_color black;
-	draw_rect (x*32) (y*36) 32 36;
-set_color red;
-	fill_rect (x*32+1) (y*36+1) 31 35
-done
-done
-
 let draw_tableau l =
 	let i = ref 0 in 
 	set_color black;
-	for y = 0 to 19 do
-		for x = 0 to  39 do
+	for y = 0 to 39 do
+		for x = 0 to  79 do
 			set_color black;
-			draw_rect (x*32) (y*36) 32 36;
+			draw_rect (x*16) (y*18) 16 13;
 			match l.(!i) with
-				|Empty -> i:=!i+1 ; set_color magenta; fill_rect (x*32+1) (y*36+1) 31 35
+
+                               |Block -> i:=!i+1 ; set_color green; 
+                                         fill_rect (x*16+1) (y*18+1) 16 13
+
+
+				|Empty -> i:=!i+1 ; set_color magenta; 
+                                                   fill_rect (x*16+1) (y*18+1) 16 13
 				|Voiture a -> 
-                        if a < 3 then begin i:=!i+1 ; set_color red; fill_rect (x*32+1) (y*36+1) 31 35 end
-			else begin i:=!i+1 ; set_color cyan; fill_rect (x*32+1) (y*36+1) 31 35 end;
+                        if a < 3 then begin i:=!i+1 ; set_color red; fill_rect (x*16+1) (y*18+1) 16 13 end
+			else begin i:=!i+1 ; set_color cyan; fill_rect (x*16+1) (y*18+1) 16 13 end;
 				done
 done
 
-	
+let block l t case =
+        if t mod 50 = 0 then if l.(case) = Block   
+                                then l.(case) <- Empty
+                                else l.(case) <- Block
+
+
 let _ = 
-	let grille = Array.make 800 Empty in
+	let grille = Array.make 16000 Empty in
 	open_graph " 1280x720";
 	remember_mode true;
 	display_mode false;
         fill grille;
-        for _ = 0 to 500 do     
+        grille.(50) <- Block;
+        for _ = 1 to 2000  do     
                                 grille.(0) <- Voiture 1; 
                                 clear_graph();
                                 draw_tableau grille; 
                                 synchronize();
                                 tout grille;
-                                Unix.sleepf 0.5  done
+                                Unix.sleepf 0.2  done
