@@ -51,7 +51,7 @@ let mvt l =
 		match l.(i) with
 		|Empty -> ()
                 |Block -> ()
-		|Voiture a -> if (i+a) < Array.length l then l.(i+a) <- Voiture a; l.(i) <- Empty
+		|Voiture a -> if (i+a) < Array.length l then l.(i+a) <- Voiture a; if a != 0 then  l.(i) <- Empty
 done
 
 let tout grille =
@@ -94,7 +94,7 @@ let draw_tableau l =
 done
 
 let block l t case =
-        if t mod 50 = 0 then if l.(case) = Block   
+        if t mod 300 = 0 then if l.(case) = Block   
                                 then l.(case) <- Empty
                                 else l.(case) <- Block
 
@@ -105,11 +105,11 @@ let _ =
 	remember_mode true;
 	display_mode false;
         fill grille;
-        grille.(50) <- Block;
-        for _ = 1 to 2000  do     
+        for t = 1 to 90000  do   
+                                block grille t 1000;  
                                 grille.(0) <- Voiture 1; 
                                 clear_graph();
                                 draw_tableau grille; 
                                 synchronize();
                                 tout grille;
-                                Unix.sleepf 0.2  done
+                                Unix.sleepf 0.02  done
