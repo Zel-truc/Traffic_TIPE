@@ -74,42 +74,46 @@ let fill grille =
 
 let draw_tableau l =
 	let i = ref 0 in 
-	set_color black;
+	set_color (rgb 31 19 0);
+        fill_rect 0 0 1280 720;
 	for y = 0 to 39 do
 		for x = 0 to  79 do
 			set_color black;
 			draw_rect (x*16) (y*18) 16 13;
 			match l.(!i) with
-
-                               |Block -> i:=!i+1 ; set_color green; 
+                               |Block -> i:=!i+1 ; set_color (rgb 247 147 76 ); 
                                          fill_rect (x*16+1) (y*18+1) 16 13
 
 
-				|Empty -> i:=!i+1 ; set_color magenta; 
+				|Empty -> i:=!i+1 ; set_color (rgb 31 19 0); 
                                                    fill_rect (x*16+1) (y*18+1) 16 13
 				|Voiture a -> 
-                        if a < 3 then begin i:=!i+1 ; set_color red; fill_rect (x*16+1) (y*18+1) 16 13 end
-			else begin i:=!i+1 ; set_color cyan; fill_rect (x*16+1) (y*18+1) 16 13 end;
+                        if a < 3 then begin i:=!i+1 ; set_color (rgb 204 88 3); 
+                                  fill_rect (x*16+1) (y*18+1) 16 13 end
+			else begin i:=!i+1 ; set_color (rgb 255 193 94); 
+                                  fill_rect (x*16+1) (y*18+1) 16 13 end;
 				done
 done
 
-let block l t case =
-        if t mod 300 = 0 then if l.(case) = Block   
-                                then l.(case) <- Empty
-                                else l.(case) <- Block
-
-
-let _ = 
+let block l t case startmod  =
+        if t mod 100 = 0 then
+                if l.(case) = Block 
+                then l.(case) <- Empty
+                else
+                     if t mod startmod = 0 then 
+                             l.(case) <- Block
+  
+  let _ = 
 	let grille = Array.make 16000 Empty in
 	open_graph " 1280x720";
 	remember_mode true;
 	display_mode false;
         fill grille;
         for t = 1 to 90000  do   
-                                block grille t 1000;  
-                                grille.(0) <- Voiture 1; 
+                                block grille t 1000 600;  
+                                grille.(0) <- Voiture 0; 
                                 clear_graph();
                                 draw_tableau grille; 
                                 synchronize();
                                 tout grille;
-                                Unix.sleepf 0.02  done
+                                Unix.sleepf 0.002  done
