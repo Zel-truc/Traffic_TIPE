@@ -1,0 +1,3 @@
+(executable
+    (name vdr) 
+    (libraries graphics unix))
