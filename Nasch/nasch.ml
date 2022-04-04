@@ -109,6 +109,7 @@ let block l t case startmod  =
 	remember_mode true;
 	display_mode false;
         fill grille;
+        let sleep = ref 0.5 in
         for t = 1 to 90000  do   
                                 block grille t 1000 600;  
                                 grille.(0) <- Voiture 0; 
@@ -116,4 +117,11 @@ let block l t case startmod  =
                                 draw_tableau grille; 
                                 synchronize();
                                 tout grille;
-                                Unix.sleepf 0.002  done
+                                if key_pressed () then let c = read_key () in
+                                match c with 
+                                |'c' -> sleep:= !sleep +. 0.05
+                                |'b' -> sleep:= !sleep -. 0.05
+                                |_ -> () 
+                                else
+                                Unix.sleepf !sleep;
+        done
