@@ -1,0 +1,3 @@
+(executable
+    (name biham)
+    (libraries curses graphics unix))
