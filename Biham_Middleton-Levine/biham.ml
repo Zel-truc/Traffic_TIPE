@@ -51,7 +51,13 @@ let mvt l =
 				else
 				if l.(y).(x+1) <> Empty then ()
 				else begin l.(y).(x+1) <- Red;l.(y).(x) <- Empty end
-			|Blue -> ()
+			|Blue -> if y+1 = ymax then
+				if l.(0).(x) != Empty then ()
+						    else begin l.(0).(x) <- Blue; l.(y).(x) <- Empty end
+				
+				else
+				if l.(y+1).(x) <> Empty then ()
+				else begin l.(y+1).(x) <- Blue;l.(y).(x) <- Empty end
 		
 done
 done
@@ -61,7 +67,7 @@ done
 	remember_mode true;
 	display_mode false;
         fill_grille 10 grille;
-        let sleep = ref 0.05 in
+        let sleep = ref 0.00005 in
         for _ = 1 to 90000  do   
                                 clear_graph();
                                 draw_tableau grille; 
