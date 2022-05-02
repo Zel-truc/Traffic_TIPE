@@ -55,8 +55,8 @@ match l.(y).(x) with
 let mvt l = 
 	let xmax = Array.length l.(0) in
 	let ymax = Array.length l in
-	for y = 0 to ymax - 1 do	 
-  		for x = 0 to xmax - 1 do
+	for y = ymax-1 downto 0 do	 
+  		for x = xmax - 1 downto 0 do
 			match l.(y).(x) with 
 			|Empty -> ()
 			|Red -> if x+1 = xmax then
