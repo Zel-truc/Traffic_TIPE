@@ -14,27 +14,8 @@ let separateur = ref 0 in
 				else ()
 
 done
-done 
-let draw_tableau l =
-
-	let xmax = Array.length l.(0) in
-	let ymax = Array.length l in
-	let xstep = 1280 / xmax in 
-	let ystep = 1280 / ymax in
-	set_color (rgb 31 19 0);
-        fill_rect 0 0 1280 720;
-	for y = 0 to ymax-1 do
-		for x = 0 to xmax-1  do
-			set_color black;
-			match l.(y).(x) with
-				|Empty -> set_color (rgb 255 255 255); 
-                                                   fill_rect (x*xstep) (y*ystep) (xstep) (ystep)
-				|Red -> set_color (rgb 219 48 105); 
-                                                   fill_rect (x*xstep) (y*ystep) (xstep) (ystep)
-				|Blue ->  set_color (rgb 20 70 160); 
-                                                   fill_rect (x*xstep) (y*ystep) (xstep) (ystep)
-				done
 done
+
 
 let draw_case x y l =
 let xmax = Array.length l.(0) in
@@ -50,6 +31,19 @@ match l.(y).(x) with
 
 |Blue ->  set_color (rgb 20 70 160); 
 	fill_rect (x*xstep) (y*ystep) (xstep) (ystep)
+
+
+let draw_tableau l =
+
+	let xmax = Array.length l.(0) in
+	let ymax = Array.length l in
+	set_color (rgb 31 19 0);
+        fill_rect 0 0 1280 720;
+	for y = 0 to ymax-1 do
+		for x = 0 to xmax-1  do
+		draw_case x y l
+done done
+
 
 
 let mvt l = 
@@ -86,9 +80,9 @@ done
         fill_grille 10 grille;
         draw_tableau grille;	
         let sleep = ref 0.00005 in
-        for _ = 1 to 90000  do   
-                                synchronize();
+        for _ = 1 to 90000  do  
 				mvt grille;
+                                synchronize();
                                 if key_pressed () then let c = read_key () in
                                 match c with
 				|'r' -> draw_tableau grille 
