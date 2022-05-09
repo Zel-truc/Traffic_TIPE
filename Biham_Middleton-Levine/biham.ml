@@ -26,18 +26,14 @@ let emptycolor = Color.create 255 255 255 255 in
 let redcolor = Color.create 219 48 105 255 in
 let bluecolor = Color.create 20 70 160 255 in 	
 match l.(y).(x) with
-|Empty ->begin begin_drawing ();
-	draw_rectangle (x*xstep) (y*ystep) (xstep) (ystep) emptycolor;
-	end_drawing();
-	end
-|Red -> begin begin_drawing ();
-	draw_rectangle (x*xstep) (y*ystep) (xstep) (ystep) redcolor;
-	end_drawing();
-	end                                        
-|Blue -> begin begin_drawing ();
-	draw_rectangle (x*xstep) (y*ystep) (xstep) (ystep) bluecolor;
-	end_drawing();
-	end
+|Empty ->draw_rectangle (x*xstep) (y*ystep) (xstep) (ystep) emptycolor
+	
+|Red -> draw_rectangle (x*xstep) (y*ystep) (xstep) (ystep) redcolor
+	
+                                       
+|Blue -> draw_rectangle (x*xstep) (y*ystep) (xstep) (ystep) bluecolor
+	
+
      
 let draw_tableau l =
 
@@ -87,17 +83,16 @@ let rec loop grille =
 	match Raylib.window_should_close () with
 		|true -> Raylib.close_window ()
 		|false ->
-	let open Raylib in 
+	let open Raylib in
 	begin_drawing ();
 	mvt grille;
-	draw_tableau grille;
 	end_drawing();
 	loop grille
 
 let _ =
 let grille = Array.make_matrix (1280/2) (720/2) Empty in 
 fill_grille 10 grille;
-setup (); 
+setup ();
 loop grille;
 
 
