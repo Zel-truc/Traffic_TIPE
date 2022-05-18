@@ -69,31 +69,34 @@ let fill grille =
          grille.(2) <- Voiture 2;
          grille.(5) <- Voiture 1
 
+let draw_case x y l =
+    let xmax = Array.length l.(0) in
+    let ymax = Array.length l in	
+    let xstep = 1280 / xmax in 
+    let ystep = 720 / ymax in
+    let open Raylib in
 
-
+    let emptycolor = Color.create 1 25 54 255 in
+    let redcolor = Color.create 237 37 78 255 in
+    let bluecolor = Color.create 194 234 189 255 in 	
+    draw_rectangle (x*xstep) (y*ystep) (xstep) (ystep) 
+        (match l.(y).(x) with
+            |Empty ->emptycolor
+            |Voiture x when x > 3 -> redcolor
+            |_ -> bluecolor)
+     
 
 let draw_tableau l =
-	let i = ref 0 in 
-	set_color (rgb 31 19 0);
-        fill_rect 0 0 1280 720;
-	for y = 0 to 39 do
-		for x = 0 to  79 do
-			set_color black;
-			draw_rect (x*16) (y*18) 16 13;
-			match l.(!i) with
-                               |Block -> i:=!i+1 ; set_color (rgb 247 147 76 ); 
-                                         fill_rect (x*16+1) (y*18+1) 16 13
+	let xmax = Array.length l.(0) in
+	let ymax = Array.length l in
+
+	for y = 0 to ymax-1 do
+		for x = 0 to xmax-1  do
+		    draw_case x y l
+        done 
+    done
 
 
-				|Empty -> i:=!i+1 ; set_color (rgb 31 19 0); 
-                                                   fill_rect (x*16+1) (y*18+1) 16 13
-				|Voiture a -> 
-                        if a < 3 then begin i:=!i+1 ; set_color (rgb 204 88 3); 
-                                  fill_rect (x*16+1) (y*18+1) 16 13 end
-			else begin i:=!i+1 ; set_color (rgb 255 193 94); 
-                                  fill_rect (x*16+1) (y*18+1) 16 13 end;
-				done
-done
 
 let block l t case startmod  =
         if t mod 100 = 0 then
@@ -103,25 +106,23 @@ let block l t case startmod  =
                      if t mod startmod = 0 then 
                              l.(case) <- Block
   
+let setup () = 
+	Raylib.init_window 1280 720 "biham model";
+	Raylib.set_target_fps 500
+
+let rec loop grille = 
+		match Raylib.window_should_close () with
+		|true -> Raylib.close_window ()
+		|false ->
+        let open Raylib in
+		        begin_drawing ();
+                clear_background Color.raywhite;
+                tout grille;
+                draw_tableau grille;
+                end_drawing();
+				loop grille
   let _ = 
 	let grille = Array.make 16000 Empty in
-	open_graph " 1280x720";
-	remember_mode true;
-	display_mode false;
         fill grille;
-        let sleep = ref 0.5 in
-        for t = 1 to 90000  do   
-                                block grille t 1000 600;  
-                                grille.(0) <- Voiture 0; 
-                                clear_graph();
-                                draw_tableau grille; 
-                                synchronize();
-                                tout grille;
-                                if key_pressed () then let c = read_key () in
-                                match c with 
-                                |'c' -> sleep:= !sleep +. 0.05
-                                |'b' -> sleep:= !sleep -. 0.05
-                                |_ -> () 
-                                else
-                                Unix.sleepf !sleep;
-        done
+	setup();
+	loop grille;
