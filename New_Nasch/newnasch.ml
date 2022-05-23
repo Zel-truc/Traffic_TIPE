@@ -4,6 +4,21 @@ type state = Pleine of voiture | Empty
 type case = Route of (state * (int*int)) |Choice of state |Block 
 
 
+let grille_gen ()  = let l =Array.make_matrix 200 200 Block in
+			for y = 1 to 199 do
+				l.(y).(102) <- Route (Empty, (102,y-1))
+			done;
+			l.(131).(102) <- Choice Empty;
+			l.(119).(102) <- Choice Empty;
+			l.(89).(102) <- Choice Empty;
+			l.(41).(102) <- Choice Empty;
+			for x = 1 to 101 do 
+				l.(89).(x) <- Route(Empty, (x-1, 89))
+			done;
+			for x = 103 to 198 do
+				l.(89).(x) <- Route(Empty, (x+1,89))
+			done;
+			l
 
 let is_next_empty grille (x,y) = 
 	match grille.(y).(x) with
@@ -68,12 +83,12 @@ let accelerate l vmax =
 		done
 	done	
 	
-let rec newv grille v (x,y) x =
+let rec newv grille v (x,y) i =
 	if x = v then v else 
 	match grille.(y).(x) with
-	|Route (Pleine _,_) -> x-1
-	|Route (_, next) -> newv grille v next (x+1)
-	|_ -> 0
+	|Route (Pleine _,_) -> i-1
+	|Route (_, next) -> newv grille v next (i+1)
+	|_ -> 5
 
 let deccelerate l vmax =
 	let xmax = Array.length l.(0) in
@@ -81,31 +96,83 @@ let deccelerate l vmax =
 	for y = ymax-1 downto 0 do
 		for x = xmax-1 downto 0 do
 			match l.(y).(x) with
-			|Route (Pleine v, next) -> v.vitesse <- newv l v.vitesse next 1
-			|Choice Pleine v -> match v.itineraire with
-								|t::q -> v.vitesse <- newv l v.vitesse t 1
+			|Route (Pleine v, next) -> v.vitesse <- if (newv l v .vitesse next 1) > vmax then vmax else  newv l v .vitesse next 1
+			|Choice (Pleine v) -> begin match v.itineraire with
+								|t::_ -> v.vitesse <- if (newv l v .vitesse t 1) > vmax then vmax else  newv l v .vitesse t 1
+								|[] -> failwith "itineraire faux" end
 			|_ -> ()
 		done
 	done
-(*let randomize grille p =
-let tout grille =
-let fill grille =
+let randomize l p =
+	let xmax = Array.length l.(0) in
+	let ymax = Array.length l in 
+	for y = ymax-1 downto 0 do
+		for x = xmax-1 downto 0 do
+			match l.(y).(x) with
+			|Route (Pleine v, _) -> if v.vitesse <> 0 && Random.int 99 < p
+								then v.vitesse <- v.vitesse-1
+			|Choice Pleine v -> if v.vitesse <> 0 && Random.int 99 < p
+								then v.vitesse <- v.vitesse-1
+			|_ -> ()
+	done
+done
+let tout grille = 
+	accelerate grille 5;
+	deccelerate grille 5;
+	randomize grille 30;
+	mvt grille
+	
+	
+(*let fill grille =
 let heatmap_inc =
 let heatmap_gen = 
+
+*)
+
+let draw_case l (x,y) =
+	let xmax = Array.length l.(0) in
+    let ymax = Array.length l in	
+    let xstep = 800 / xmax in 
+    let ystep = 800 / ymax in
+    let open Raylib in
+
+    let emptycolor = Color.create 1 25 54 255 in
+    let redcolor = Color.create 237 37 78 255 in
+    let bluecolor = Color.create 194 234 189 255 in 
+	let blackcolor = Color.create 194 54 0 255	in
+    draw_rectangle (x*xstep) (y*ystep) (xstep) (ystep) 
+	(match l.(y).(x) with
+	|Route (Pleine v, _) -> if v.vitesse >3 then redcolor else bluecolor
+	|Choice Pleine v -> if v.vitesse >3 then redcolor else bluecolor
+	|Block -> blackcolor
+	|_ -> emptycolor)
+
+let draw_tableau l =
+	let xmax = Array.length l.(0) in
+	let ymax = Array.length l in
+
+	for y = 0 to ymax-1 do
+		for x = 0 to xmax-1  do
+		    draw_case l (x,y)
+        done 
+    done
 
 
 
 let setup () =
 	Raylib.init_window 1200 800 "Nasch model";
-	Raylib.set_target_fps 144
+	Raylib.set_target_fps 10
 
 let rec loop grille =
 	match Raylib.window_should_close () with
 	|true -> Raylib.close_window()
 	|false ->
 	tout grille;
+	let open Raylib in
 	begin_drawing();
-	draw_tableau();
+	draw_tableau grille;
 	end_drawing();
-	loop grille;
-*)		
+	loop grille
+let _ =
+	setup ();
+	loop (grille_gen())
