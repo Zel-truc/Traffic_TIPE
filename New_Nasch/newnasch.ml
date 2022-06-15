@@ -4,8 +4,8 @@ type state = Pleine of voiture | Empty
 type case = Route of (state * (int*int)) |Choice of state |Block 
 
 
-let grille_gen ()  = let l =Array.make_matrix 200 200 Block in
-			for y = 1 to 199 do
+let finale_grille_gen ()  = let l =Array.make_matrix 200 200 Block in
+			for y = 1 to 198 do
 				l.(y).(102) <- Route (Empty, (102,y-1))
 			done;
 			l.(131).(102) <- Choice Empty;
@@ -40,8 +40,28 @@ let grille_gen ()  = let l =Array.make_matrix 200 200 Block in
 			for x = 159 to 199 do 
 				l.(118).(x) <- Route(Empty, (x+1, 118))
 			done;
+			for x = 103 to 129 do 
+				l.(119).(x) <- Route(Empty, (x+1,119))
+			done;
+			for y = 119 to 140 do
+				l.(y).(130) <- Route(Empty, (130, y+1))
+			done;
+			for x = 130 to 198 do
+				l.(140).(x) <- Route(Empty, (x+1, 140))
+			done;		
+			l.(120).(44) <- Choice Empty;
+			l.(89).(158) <- Choice Empty;
 			l
 
+let grille_gen() = 
+	let l =Array.make_matrix 200 200 Block in
+	for x = 0 to 198 do 
+		l.(x).(100) <- Route(Empty, (100,x+1))
+	done;
+	for x = 0 to 198 do 
+		l.(150).(x) <- Route(Empty, (x+1,150))
+	done;
+	l
 let is_next_empty grille (x,y) = 
 	match grille.(y).(x) with
 	|Block -> false
@@ -52,7 +72,7 @@ let rec move_aux (grille: case array array) (v: voiture) ((x,y): int*int) (inc:i
 	let choice_handler v =
 		match v.itineraire with 
 		|t::q -> v.itineraire <- q; t
-		|_ -> failwith "erreur"
+		|_ -> (0,0) (* A CORRIGER*)
 	in
 		if inc = 0 
 			then match grille.(y).(x) with
@@ -182,6 +202,10 @@ let draw_tableau l =
     done
 
 
+let car_add g (x,y) = 
+match g.(y).(x) with
+|Route (_,next) -> g.(y).(x) <- Route(Pleine {vitesse = 1; itineraire= []},next)
+|_ -> ()
 
 let setup () =
 	Raylib.init_window 1200 800 "Nasch model";
@@ -191,6 +215,7 @@ let rec loop grille =
 	match Raylib.window_should_close () with
 	|true -> Raylib.close_window()
 	|false ->
+	car_add grille (102,180);
 	tout grille;
 	let open Raylib in
 	begin_drawing();
@@ -199,4 +224,4 @@ let rec loop grille =
 	loop grille
 let _ =
 	setup ();
-	loop (grille_gen())
+	loop (finale_grille_gen())
