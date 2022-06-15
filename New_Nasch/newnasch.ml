@@ -18,6 +18,28 @@ let grille_gen ()  = let l =Array.make_matrix 200 200 Block in
 			for x = 103 to 198 do
 				l.(89).(x) <- Route(Empty, (x+1,89))
 			done;
+			for x = 103 to 151 do 
+				l.(41).(x) <- Route(Empty ,(x+1,41))
+			done;
+			l.(41).(151) <- Route(Empty ,(151,42));
+			for y = 42 to 88 do 
+				l.(y).(151) <- Route(Empty, (151,y+1))
+			done;
+			for y = 90 to 131 do 
+				l.(y).(44) <- Route(Empty, (44,y-1))
+			done;
+			for x = 45 to 101 do
+				l.(131).(x) <- Route(Empty, (x-1,131))
+			done;
+			for x = 43 downto 1 do
+				l.(120).(x) <- Route(Empty, (x-1, 131))
+			done;
+			for y = 90 to 118 do
+				l.(y).(158) <- Route(Empty, (158, y+1))
+			done;
+			for x = 159 to 199 do 
+				l.(118).(x) <- Route(Empty, (x+1, 118))
+			done;
 			l
 
 let is_next_empty grille (x,y) = 
@@ -140,11 +162,13 @@ let draw_case l (x,y) =
     let redcolor = Color.create 237 37 78 255 in
     let bluecolor = Color.create 194 234 189 255 in 
 	let blackcolor = Color.create 194 54 0 255	in
+	let greencolor = Color.create 0 255 0 255 in
     draw_rectangle (x*xstep) (y*ystep) (xstep) (ystep) 
 	(match l.(y).(x) with
 	|Route (Pleine v, _) -> if v.vitesse >3 then redcolor else bluecolor
 	|Choice Pleine v -> if v.vitesse >3 then redcolor else bluecolor
 	|Block -> blackcolor
+	|Choice Empty -> greencolor
 	|_ -> emptycolor)
 
 let draw_tableau l =
