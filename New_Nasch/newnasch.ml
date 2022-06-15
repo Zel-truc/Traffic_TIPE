@@ -55,11 +55,8 @@ let finale_grille_gen ()  = let l =Array.make_matrix 200 200 Block in
 
 let grille_gen() = 
 	let l =Array.make_matrix 200 200 Block in
-	for x = 0 to 198 do 
-		l.(x).(100) <- Route(Empty, (100,x+1))
-	done;
-	for x = 0 to 198 do 
-		l.(150).(x) <- Route(Empty, (x+1,150))
+	for x = 2 to 197 do 
+		l.(100).(x) <- Route(Empty, (x-1,100))
 	done;
 	l
 let is_next_empty grille (x,y) = 
@@ -81,7 +78,7 @@ let rec move_aux (grille: case array array) (v: voiture) ((x,y): int*int) (inc:i
 			|_ -> ()
 		else
 			match grille.(y).(x) with
-			|Route (_,next) when next <> (-1,-1) -> move_aux grille v next (inc-1)
+			|Route (_,next) -> move_aux grille v next (inc-1)
 			|Choice _ -> (*possible bug car v n'est pas mis à jour, normalement le mutable est une référence*)
 						move_aux grille v (choice_handler v) (inc-1)	
 			|_ -> ()		
@@ -92,7 +89,7 @@ let move (grille: case array array)  s (x,y) : unit=
 		|Pleine v ->  move_aux grille v (x,y) v.vitesse  
 		|_ -> ()
 
-
+(*A REFAIRE, INCOMPATIBLE AVEC PLUSIEURS SENS DE DEPLACEMENTS*)
 let mvt grille =
 	let xmax = Array.length grille.(0) in
 	let ymax = Array.length grille in 
@@ -215,7 +212,7 @@ let rec loop grille =
 	match Raylib.window_should_close () with
 	|true -> Raylib.close_window()
 	|false ->
-	car_add grille (102,180);
+	car_add grille (100,100);
 	tout grille;
 	let open Raylib in
 	begin_drawing();
@@ -224,4 +221,4 @@ let rec loop grille =
 	loop grille
 let _ =
 	setup ();
-	loop (finale_grille_gen())
+	loop (grille_gen())
