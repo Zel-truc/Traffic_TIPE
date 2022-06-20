@@ -246,9 +246,35 @@ match g.(y).(x) with
 let heatmap_gen () = 
 	Array.make_matrix 200 200 0
 
+
+let get_max l =
+	let max = ref 0 in 
+	let xmax = Array.length l.(0) in
+	let ymax = Array.length l in 
+	for y = ymax-1 downto 0 do
+		for x = xmax-1 downto 0 do
+		match l.(y).(x) with
+		|a when a > !max -> max:=a
+		|_ -> ()
+		done
+	done;
+	!max
+let draw_heatmap l =
+	let max = get_max l in
+	let open Raylib in
+	let xmax = Array.length l.(0) in
+	let ymax = Array.length l in 
+	draw_rectangle 800 0 800 800 (Color.create 201 228 231 255); 
+	for y = ymax-1 downto 0 do
+		for x = xmax-1 downto 0 do
+		draw_circle (x*4 + 800) (y*4) ((float(l.(y).(x)) /. float(max)) *. 100.) (Color.create 180 160 228 255)
+		done
+	done
+	
 let setup () =
-	Raylib.init_window 1200 800 "Nasch model";
+	Raylib.init_window 1600 800 "Nasch model";
 	Raylib.set_target_fps 110
+
 
 let rec loop grille heatmap=
 	match Raylib.window_should_close () with
@@ -259,6 +285,7 @@ let rec loop grille heatmap=
 	let open Raylib in
 	begin_drawing();
 	draw_tableau grille;
+	draw_heatmap heatmap;
 	end_drawing();
 	loop grille heatmap
 let _ =
