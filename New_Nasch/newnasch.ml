@@ -1,8 +1,7 @@
 type info = (int * int) list 
-type voiture = {mutable vitesse : int; mutable itineraire : (int * int) list}
+type voiture = {mutable vitesse : int; mutable itineraire : (int * int) list; mutable trouve : bool}
 type state = Pleine of voiture | Empty  
 type case = Route of (state * (int*int)) |Choice of state |Block 
-
 
 let finale_grille_gen ()  = let l =Array.make_matrix 200 200 Block in
 			for y = 1 to 198 do
@@ -53,6 +52,17 @@ let finale_grille_gen ()  = let l =Array.make_matrix 200 200 Block in
 			l.(89).(158) <- Choice Empty;
 			l
 
+let v_gen () =
+	let aux_vgen () =  
+	let choice = Random.int 60 in
+	if choice < 10 then [(101,131);(43,120)] (*left left*)
+	else if choice < 15 then [(102,130);(103,119)](*up right*)
+	else if choice < 35 then [(102,130);(102;118);(102,88)](*up up up*)
+	else if choice < 40 then [(102,130);(102;118);(103,89)](*up up right*)
+	else if choice < 50 then [(102,130);(102;118);(103,89);(158,90)](*up up right right*)
+	else [(101,131);(44,119)] (*left up*)
+	in {vitesse = 3; itineraire = aux_vgen()}
+
 let grille_gen() = 
 	let l =Array.make_matrix 200 200 Block in
 	for x = 2 to 197 do 
@@ -73,8 +83,8 @@ let rec move_aux (grille: case array array) (v: voiture) ((x,y): int*int) (inc:i
 	in
 		if inc = 0 
 			then match grille.(y).(x) with
-			|Route (_,next) -> grille.(y).(x) <- Route (Pleine v, next)
-			|Choice _ -> grille.(y).(x) <- Choice (Pleine v)
+			|Route (_,next) -> begin v.trouve <- true; grille.(y).(x) <-Route (Pleine v, next) end
+			|Choice _ -> begin v.trouve <- true; grille.(y).(x) <- Choice (Pleine v) end
 			|_ -> ()
 		else
 			match grille.(y).(x) with
@@ -82,21 +92,33 @@ let rec move_aux (grille: case array array) (v: voiture) ((x,y): int*int) (inc:i
 			|Choice _ -> (*possible bug car v n'est pas mis à jour, normalement le mutable est une référence*)
 						move_aux grille v (choice_handler v) (inc-1)	
 			|_ -> ()		
-	
 
 let move (grille: case array array)  s (x,y) : unit=
 		match s with 
 		|Pleine v ->  move_aux grille v (x,y) v.vitesse  
 		|_ -> ()
 
-(*A REFAIRE, INCOMPATIBLE AVEC PLUSIEURS SENS DE DEPLACEMENTS*)
+let unmark grille = 
+	let xmax = Array.length grille.(0) in
+	let ymax = Array.length grille in 
+	for y = ymax-1 downto 0 do
+		for x = xmax-1 downto 0 do
+			match grille.(y).(x) with
+			|Route(Pleine v,_) -> v.trouve <- false
+			|_ -> ()
+		done
+	done
+	
 let mvt grille =
 	let xmax = Array.length grille.(0) in
 	let ymax = Array.length grille in 
 	for y = ymax-1 downto 0 do
 		for x = xmax-1 downto 0 do
 			match grille.(y).(x) with
-			|Route (s,next) when s <> Empty -> 
+			|Route (s,next) when s <> Empty  && ( match s with	
+												|Pleine v -> not (v.trouve)
+												|Empty -> false
+							)-> 
 								begin 
 								grille.(y).(x) <- Route (Empty,next);
 								move grille s (x,y)  
@@ -159,7 +181,8 @@ let tout grille =
 	accelerate grille 5;
 	deccelerate grille 5;
 	randomize grille 30;
-	mvt grille
+	mvt grille;
+	unmark grille
 	
 	
 (*let fill grille =
@@ -201,18 +224,18 @@ let draw_tableau l =
 
 let car_add g (x,y) = 
 match g.(y).(x) with
-|Route (_,next) -> g.(y).(x) <- Route(Pleine {vitesse = 1; itineraire= []},next)
+|Route (_,next) -> g.(y).(x) <- Route(Pleine {vitesse = 1; itineraire= [(101,131);(44,119)]; trouve = false},next)
 |_ -> ()
 
 let setup () =
 	Raylib.init_window 1200 800 "Nasch model";
-	Raylib.set_target_fps 10
+	Raylib.set_target_fps 144
 
 let rec loop grille =
 	match Raylib.window_should_close () with
 	|true -> Raylib.close_window()
 	|false ->
-	car_add grille (100,100);
+	car_add grille (102,198);
 	tout grille;
 	let open Raylib in
 	begin_drawing();
@@ -221,4 +244,4 @@ let rec loop grille =
 	loop grille
 let _ =
 	setup ();
-	loop (grille_gen())
+	loop (finale_grille_gen())
