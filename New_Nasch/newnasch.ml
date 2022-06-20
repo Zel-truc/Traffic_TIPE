@@ -179,12 +179,26 @@ let randomize l p =
 			|_ -> ()
 	done
 done
-let tout grille = 
+
+let heatmap_inc l h = 
+	let xmax = Array.length l.(0) in
+	let ymax = Array.length l in 
+	for y = ymax-1 downto 0 do
+		for x = xmax-1 downto 0 do
+		match l.(y).(x) with
+		|Route(Pleine _, _) -> h.(y).(x) <- h.(y).(x) + 1
+		|Choice Pleine _ -> h.(y).(x) <- h.(y).(x) + 1
+		|_ -> ()
+	done
+done
+
+let tout grille heatmap = 
 	accelerate grille 5;
 	deccelerate grille 5;
 	randomize grille 30;
 	mvt grille;
-	unmark grille
+	unmark grille;
+	heatmap_inc grille heatmap
 	
 	
 (*let fill grille =
@@ -229,21 +243,24 @@ match g.(y).(x) with
 |Route (_,next) -> g.(y).(x) <- Route(Pleine (v_gen()),next)
 |_ -> ()
 
+let heatmap_gen () = 
+	Array.make_matrix 200 200 0
+
 let setup () =
 	Raylib.init_window 1200 800 "Nasch model";
 	Raylib.set_target_fps 110
 
-let rec loop grille =
+let rec loop grille heatmap=
 	match Raylib.window_should_close () with
 	|true -> Raylib.close_window()
 	|false ->
 	car_add grille (102,198);
-	tout grille;
+	tout grille heatmap;
 	let open Raylib in
 	begin_drawing();
 	draw_tableau grille;
 	end_drawing();
-	loop grille
+	loop grille heatmap
 let _ =
 	setup ();
-	loop (finale_grille_gen())
+	loop (finale_grille_gen()) (heatmap_gen())
