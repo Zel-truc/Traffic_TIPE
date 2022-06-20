@@ -54,14 +54,16 @@ let finale_grille_gen ()  = let l =Array.make_matrix 200 200 Block in
 
 let v_gen () =
 	let aux_vgen () =  
-	let choice = Random.int 60 in
+	let choice = Random.int 70 in
 	if choice < 10 then [(101,131);(43,120)] (*left left*)
 	else if choice < 15 then [(102,130);(103,119)](*up right*)
-	else if choice < 35 then [(102,130);(102;118);(102,88)](*up up up*)
-	else if choice < 40 then [(102,130);(102;118);(103,89)](*up up right*)
-	else if choice < 50 then [(102,130);(102;118);(103,89);(158,90)](*up up right right*)
+	else if choice < 35 then [(102,130);(102,118);(102,88)](*up up up*)
+	else if choice < 40 then [(102,130);(102,118);(103,89);(158,90)](*up up right*)
+	else if choice < 50 then [(102,130);(102,118);(103,89);(158,90)](*up up right right*)
+	else if choice < 55 then [(102,130);(102,118);(103,89)](*up up right straight*)
+	else if choice < 70 then [(102,130);(102,118);(101,89)] (*up up left*)
 	else [(101,131);(44,119)] (*left up*)
-	in {vitesse = 3; itineraire = aux_vgen()}
+	in {vitesse = 3; itineraire = aux_vgen(); trouve = false}
 
 let grille_gen() = 
 	let l =Array.make_matrix 200 200 Block in
@@ -160,7 +162,7 @@ let deccelerate l vmax =
 			|Route (Pleine v, next) -> v.vitesse <- if (newv l v .vitesse next 1) > vmax then vmax else  newv l v .vitesse next 1
 			|Choice (Pleine v) -> begin match v.itineraire with
 								|t::_ -> v.vitesse <- if (newv l v .vitesse t 1) > vmax then vmax else  newv l v .vitesse t 1
-								|[] -> failwith "itineraire faux" end
+								|[] -> Printf.printf "problème en %d %d" x y ;()(*failwith "itineraire faux %d %d"*)  end
 			|_ -> ()
 		done
 	done
@@ -224,12 +226,12 @@ let draw_tableau l =
 
 let car_add g (x,y) = 
 match g.(y).(x) with
-|Route (_,next) -> g.(y).(x) <- Route(Pleine {vitesse = 1; itineraire= [(101,131);(44,119)]; trouve = false},next)
+|Route (_,next) -> g.(y).(x) <- Route(Pleine (v_gen()),next)
 |_ -> ()
 
 let setup () =
 	Raylib.init_window 1200 800 "Nasch model";
-	Raylib.set_target_fps 144
+	Raylib.set_target_fps 110
 
 let rec loop grille =
 	match Raylib.window_should_close () with
