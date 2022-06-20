@@ -55,7 +55,7 @@ let finale_grille_gen ()  = let l =Array.make_matrix 200 200 Block in
 let v_gen () =
 	let aux_vgen () =  
 	let choice = Random.int 70 in
-	if choice < 10 then [(101,131);(43,120)] (*left left*)
+	if choice < 10 then [(101,131);(5,120)] (*left left*)
 	else if choice < 15 then [(102,130);(103,119)](*up right*)
 	else if choice < 35 then [(102,130);(102,118);(102,88)](*up up up*)
 	else if choice < 40 then [(102,130);(102,118);(103,89);(158,90)](*up up right*)
